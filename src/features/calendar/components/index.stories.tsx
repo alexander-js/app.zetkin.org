@@ -118,7 +118,9 @@ multiShiftEvent.args = {
         title: 'Hööööör',
       },
       num_participants_required: 20,
-      num_participants_available: 16
+      num_participants_available: 16,
+      start_time: '2022-06-16T07:00:00+00:00',
+      end_time: '2022-06-16T09:00:00+00:00',
     }),
     mockEvent({
       title: 'Zetkin Code Camp 2023',
@@ -129,7 +131,22 @@ multiShiftEvent.args = {
         title: 'Malmö',
       },
       num_participants_required: 20,
-      num_participants_available: 16
+      num_participants_available: 16,
+      start_time: '2022-06-16T09:00:00+00:00',
+      end_time: '2022-06-16T11:00:00+00:00',
+    }),
+    mockEvent({
+      title: 'Zetkin Code Camp 2023',
+      location: {
+        id: 1,
+        lat: 51.192702,
+        lng: 12.284873,
+        title: 'Göteborg',
+      },
+      num_participants_required: 20,
+      num_participants_available: 16,
+      start_time: '2022-06-16T11:00:00+00:00',
+      end_time: '2022-06-16T13:00:00+00:00',
     })
   ],
   remindersNotSent: 4,
