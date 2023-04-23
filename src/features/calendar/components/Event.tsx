@@ -254,7 +254,19 @@ function createMultiLocationFields(props: MultiLocationProps): Field[] {
 function createMultiShiftFieldGroups(props: MultiShiftProps): Field[][] {
   const fieldGroups: Field[][] = props.events.map((event, index) => {
     const isFirstEvent = index === 0
+    const scheduledTime = `${formatDate(event.start_time)} - ${formatDate(event.end_time)}`;
     let fields: (null | Field)[] = []
+
+    function formatDate(dateString: string) {
+        const date = new Date(dateString)
+        const hours = date.getHours()
+        const minutes = date.getMinutes()
+
+        const paddedHours = hours > 9 ? hours : `0${hours}`
+        const paddedMinutes = minutes > 9 ? minutes : `0${minutes}`
+
+        return `${paddedHours}:${paddedMinutes}`
+    }
 
     if (isFirstEvent) {
       fields = [
@@ -267,6 +279,11 @@ function createMultiShiftFieldGroups(props: MultiShiftProps): Field[][] {
           kind: "Location",
           requiresAction: false,
           message: event.location.title
+        },
+        {
+          kind: "ScheduledTime",
+          requiresAction: false,
+          message: scheduledTime
         },
         props.remindersNotSent
           ? {
@@ -291,8 +308,6 @@ function createMultiShiftFieldGroups(props: MultiShiftProps): Field[][] {
               }
       ]
     } else {
-      const scheduledTime = `${event.start_time} / ${event.end_time}`;
-
       fields = [
         {
           kind: "Participants",
