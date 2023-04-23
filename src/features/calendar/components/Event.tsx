@@ -390,7 +390,8 @@ function fieldsToPresent(fields: Field[], availableHeight: number): PresentableF
 }
 
 export const Single = (props: SingleProps) => {
-  const fields = fieldsToPresent(createSingleFields(props), props.height)
+  const availableHeight = props.height - spaceRequiredForTitle
+  const fields = fieldsToPresent(createSingleFields(props), availableHeight)
 
   return (
     <Event
@@ -403,7 +404,8 @@ export const Single = (props: SingleProps) => {
 }
 
 export const MultiLocation = (props: MultiLocationProps) => {
-  const fields = fieldsToPresent(createMultiLocationFields(props), props.height)
+  const availableHeight = props.height - spaceRequiredForTitle
+  const fields = fieldsToPresent(createMultiLocationFields(props), availableHeight)
   const firstEventTitle = props.events[0].title
   const anyEventIsCancelled = props.events.some(event => event?.cancelled)
 
@@ -465,12 +467,12 @@ interface EventProps {
 
 const Event = (props: EventProps) => {
   const classes = useStyles()
-  const allFieldsAreCollapsed = !props.fieldGroups.some(group => {
-    return group.some(field => field.presentation === FIELD_PRESENTATION.WITH_LABEL)
+  const anyFieldGroupIsCollapsed = props.fieldGroups.some(group => {
+    return !group.some(field => field.presentation === FIELD_PRESENTATION.WITH_LABEL)
   })
   const availableHeightPerFieldGroup = availableHeightByEvent(props.height, props.fieldGroups.length);
 
-  if (allFieldsAreCollapsed) {
+  if (anyFieldGroupIsCollapsed) {
     const collapsedFields: PresentableField[] = allCollapsedPresentableFields(props.fieldGroups)
 
     return (
@@ -483,7 +485,7 @@ const Event = (props: EventProps) => {
         }}
       >
         {props.topBadge}
-        <span className={classes.title + (allFieldsAreCollapsed ? ' collapsed' : '')}>{ props.title }</span>
+        <span className={classes.title + (anyFieldGroupIsCollapsed ? ' collapsed' : '')}>{ props.title }</span>
         <div
           style={{
             display: 'flex',
@@ -541,7 +543,12 @@ const FieldGroup = ({ fields, height, index }: { fields: PresentableField[], hei
         paddingTop: isFirstFieldGroup ? '' : '4px'
       }}
     >
-      <div className={classes.fieldsWithIconOnly}>
+      <div
+        className={classes.fieldsWithIconOnly}
+        style={{
+          paddingTop: isFirstFieldGroup ? 0 : 4
+        }}
+      >
         {fieldsWithIconOnly.map((field) => (
           <Field field={field} />
         ))}
@@ -625,6 +632,7 @@ const fieldHeight = 18;
 const containerBottomPadding = 4
 const spaceBetweenFields = 4;
 const spaceRequiredForField = fieldHeight + spaceBetweenFields
+const spaceRequiredForTitle = titleHeight + containerBottomPadding
 
 function availableHeightByEvent(totalAvailableHeight: number, numberOfEvents: number ): Record<number, number> {
   const availableHeights: Record<number, number> = {}
@@ -642,7 +650,7 @@ function availableHeightByEvent(totalAvailableHeight: number, numberOfEvents: nu
 
 function numberOfFieldsThatCanBeShown(availableHeight: number): number {
   let fieldsThatCanBeShown = 0;
-  let remainingSpace = availableHeight - titleHeight - containerBottomPadding;
+  let remainingSpace = availableHeight;
 
   while (remainingSpace > spaceRequiredForField) {
     const nextRemainingSpace = remainingSpace - spaceRequiredForField;
@@ -659,7 +667,7 @@ function allCollapsedPresentableFields(fieldGroups: PresentableField[][]): Prese
 
   fieldGroups.forEach(group => {
     group.forEach(field => {
-      if (!(field.kind in fields)) {
+      if (!(field.kind in fields) && field.requiresAction) {
         fields[field.kind] = field
       }
     })
